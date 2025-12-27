@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useUser } from '../context/UserContext';
 
 const Login: React.FC = () => {
   const [name, setName] = useState<string>('');
   const navigate = useNavigate();
+  const { login } = useUser();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim()) {
       // Aquí guardaremos en Context después
+      login(name); 
       navigate('/menu');
     }
   };
