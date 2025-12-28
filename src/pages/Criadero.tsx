@@ -5,6 +5,12 @@ import './Criadero.css';
 
 const Criadero: React.FC = () => {
   const { user } = useUser();
+  
+  console.log("Pokemones en el equipo:", user?.pokemonTeam);
+
+  if (!user || !user.pokemonTeam) {
+    return <p>Cargando datos del entrenador...</p>;
+  }
 
   return (
     <div className="criadero-screen">

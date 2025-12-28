@@ -36,15 +36,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
   };
 
-  const addPokemon = (newPokemon: any) => {
-    setUser(prev => {
+  const addPokemon = (newPokemon: Pokemon) => {
+    setUser((prev) => {
         if (!prev) return null;
+    
+        // Usamos el spread operator para crear un nuevo arreglo
+        // y asegurar que React detecte el cambio
         return {
         ...prev,
         pokemonTeam: [...prev.pokemonTeam, newPokemon]
         };
     });
-  };
+  };      
 
   return (
     <UserContext.Provider value={{ user, login, logout, addPokemon }}>
