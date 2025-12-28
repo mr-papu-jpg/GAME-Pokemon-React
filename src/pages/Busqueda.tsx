@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
-import { Pokemon } from '../interfaces/pokemonTypes'; // Asegúrate que esta ruta sea la correcta
+import type { Pokemon } from '../interfaces/pokemonTypes'; // Asegúrate que esta ruta sea la correcta
 import './Busqueda.css';
 
 const Busqueda: React.FC = () => {
