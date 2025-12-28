@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Pokemon } from '../type'; // Importamos la interfaz que creamos antes
+import type { Pokemon } from '../interfaces/pokemonTypes'; // Importamos la interfaz que creamos antes
 import { useUser } from '../context/UserContext';
 import './Busqueda.css';
 

@@ -1,10 +1,4 @@
-export interface User {
-  username: string;
-  level: number;
-  id: string;
-}
-
-export interface Pokemon {
+export type Pokemon = {
   id: number;
   name: string;
   sprites: {
@@ -16,3 +10,10 @@ export interface Pokemon {
     }
   }[];
 }
+
+export type User = {
+  name: string;
+  level: number;
+  pokemonTeam: Pokemon[];
+}
+

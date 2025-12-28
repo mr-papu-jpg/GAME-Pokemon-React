@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
+import type { Pokemon, User } from '../interfaces/pokemonTypes';
+
 
 // 1. Definimos qué datos tendrá nuestro Usuario
 interface User {
@@ -12,7 +14,7 @@ interface UserContextType {
   user: User | null;
   login: (name: string) => void;
   logout: () => void;
-  addPokemon: (pokemon: any) => void;
+  addPokemon: (pokemon: Pokemon) => void;
 }
 
 // 3. Creamos el contexto con un valor inicial indefinido
