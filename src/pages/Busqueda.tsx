@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Pokemon } from '../type'; // Importamos la interfaz que creamos antes
-import { useUser, addPokemon } from '../context/UserContext';
+import { useUser } from '../context/UserContext';
 import './Busqueda.css';
 
 const Busqueda: React.FC = () => {
