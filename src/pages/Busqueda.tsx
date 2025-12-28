@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Pokemon } from '../type'; // Importamos la interfaz que creamos antes
-import { useUser } from '../context/UserContext';
+import { useUser, addPokemon } from '../context/UserContext';
 import './Busqueda.css';
 
 const Busqueda: React.FC = () => {
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [rarity, setRarity] = useState<string>('');
-  const { user } = useUser();
+  const { user, addPokemon } = useUser();
+  const [message, setMessage] = useState<string>('');
 
   const buscarPokemonAleatorio = async () => {
     setLoading(true);
@@ -34,6 +35,28 @@ const Busqueda: React.FC = () => {
       maxId = 1025;
       setRarity('LEGENDARIO 🔥');
     }
+
+    const intentarCapturar = () => {
+        if (!pokemon) return;
+        let exito = false;
+
+        // Probabilidades según la rareza que ya calculamos al buscar
+        if (rarity === 'COMÚN' && azar < 80) exito = true;
+        else if (rarity === 'RARO ✨' && azar < 40) exito = true;
+        else if (rarity === 'LEGENDARIO 🔥' && azar < 10) exito = true;
+
+        if (exito) {
+            addPokemon(pokemon);
+            setMessage(`¡Felicidades! Capturaste a ${pokemon.name.toUpperCase()}`);
+            setPokemon(null); // El pokemon desaparece porque ya lo atrapaste
+        } else {
+            setMessage(`¡Oh no! ${pokemon.name.toUpperCase()} se escapó...`);
+            setPokemon(null);
+        }
+
+        // Limpiar el mensaje después de 3 segundos
+        setTimeout(() => setMessage(''), 3000);
+    };
 
     const idFinal = Math.floor(Math.random() * (maxId - minId + 1)) + minId;
 
@@ -79,6 +102,10 @@ const Busqueda: React.FC = () => {
       >
         {loading ? 'Buscando...' : 'Explorar Hierba'}
       </button>
+      <button className="catch-btn" onClick={intentarCapturar}>
+        Lanzar Pokébola ⚾
+       </button>
+
     </div>
   );
 };

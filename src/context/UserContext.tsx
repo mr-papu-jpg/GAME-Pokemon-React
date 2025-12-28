@@ -12,6 +12,7 @@ interface UserContextType {
   user: User | null;
   login: (name: string) => void;
   logout: () => void;
+  addPokemon: (pokemon: any) => void;
 }
 
 // 3. Creamos el contexto con un valor inicial indefinido
@@ -33,8 +34,18 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setUser(null);
   };
 
+  const addPokemon = (newPokemon: any) => {
+    setUser(prev => {
+        if (!prev) return null;
+        return {
+        ...prev,
+        pokemonTeam: [...prev.pokemonTeam, newPokemon]
+        };
+    });
+  };
+
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={{ user, login, logout, addPokemon }}>
       {children}
     </UserContext.Provider>
   );
