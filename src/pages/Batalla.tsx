@@ -1,90 +1,125 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useUser } from '../context/UserContext';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import './Batalla.css';
 
 const Batalla: React.FC = () => {
   const { user, addExperience } = useUser();
+  const navigate = useNavigate();
+  
+  // Estados de Batalla
   const [enemy, setEnemy] = useState<any>(null);
   const [myActivePkmn, setMyActivePkmn] = useState<any>(null);
   const [enemyHP, setEnemyHP] = useState(0);
   const [myHP, setMyHP] = useState(0);
-  const [log, setLog] = useState("¡Un enemigo ha aparecido!");
+  const [log, setLog] = useState("¡Prepárate para la batalla!");
+  const [battleStatus, setBattleStatus] = useState<'fighting' | 'won' | 'lost'>('fighting');
+  const [totalXpGained, setTotalXpGained] = useState(0);
+  const [showModal, setShowModal] = useState(false);
 
-  // 1. Aparece enemigo aleatorio (Lógica similar a Búsqueda)
-  useEffect(() => {
-    const fetchEnemy = async () => {
-      const id = Math.floor(Math.random() * 151) + 1;
-      const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
-      setEnemy(res.data);
-      setEnemyHP(res.data.stats[0].base_stat * 2); // HP escalado
-    };
-    fetchEnemy();
-  }, []);
+  // Cargar batalla inicial
+  const initBattle = async () => {
+    const id = Math.floor(Math.random() * 151) + 1;
+    const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
+    setEnemy(res.data);
+    setEnemyHP(res.data.stats[0].base_stat * 2);
+    setBattleStatus('fighting');
+    setLog(`¡Un ${res.data.name.toUpperCase()} salvaje apareció!`);
 
-  // 2. Seleccionar mi primer pokemon
-  useEffect(() => {
-    if (user?.pokemonTeam.length! > 0) {
-      const first = user?.pokemonTeam[0];
-      setMyActivePkmn(first);
-      setMyHP(first.stats[0].base_stat * 2);
+    if (user?.pokemonTeam && user.pokemonTeam.length > 0) {
+      const myPkmn = user.pokemonTeam[0];
+      setMyActivePkmn(myPkmn);
+      setMyHP(myPkmn.stats[0].base_stat * 2);
     }
-  }, [user]);
+  };
+
+  useEffect(() => { initBattle(); }, []);
+
+  const handleExit = () => {
+    const confirm = window.confirm("¿En verdad quieres cancelar la pelea? Perderás posibles XP.");
+    if (confirm) navigate('/menu');
+  };
+
+  const winBattle = (xp: number) => {
+    addExperience(xp);
+    setTotalXpGained(prev => prev + xp);
+    setBattleStatus('won');
+    setLog(`¡Has derrotado a ${enemy.name}! Ganaste ${xp} XP.`);
+  };
 
   const ataqueJugador = (daño: number) => {
-    if (!enemy) return;
+    if (battleStatus !== 'fighting') return;
     const nuevaHPEnemigo = Math.max(0, enemyHP - daño);
     setEnemyHP(nuevaHPEnemigo);
-    setLog(`Usaste un ataque de ${daño} de daño!`);
-
     if (nuevaHPEnemigo <= 0) {
-      setLog("¡Ganaste! +10 XP");
-      addExperience(10); // Aquí deberías ajustar según rareza
-      return;
+      winBattle(10); // XP base por ahora
+    } else {
+      setTimeout(ataqueEnemigo, 800);
     }
-
-    // Turno enemigo tras 1 segundo
-    setTimeout(ataqueEnemigo, 1000);
   };
 
   const ataqueEnemigo = () => {
-    const dañoEnemigo = Math.floor(Math.random() * 20) + 5;
-    setMyHP(prev => Math.max(0, prev - dañoEnemigo));
-    setLog(`${enemy.name} contraataca con ${dañoEnemigo} de daño!`);
+    const daño = Math.floor(Math.random() * 15) + 5;
+    setMyHP(prev => Math.max(0, prev - daño));
+    if (myHP - daño <= 0) setBattleStatus('lost');
   };
 
-  if (!enemy || !myActivePkmn) return <div>Buscando oponente...</div>;
+  // --- COMPONENTE MODAL (PORTAL) ---
+  const XPModal = () => {
+    return ReactDOM.createPortal(
+      <div className="modal-overlay">
+        <div className="modal-content">
+          <h2>Resumen de Entrenamiento</h2>
+          <p>Experiencia total obtenida: <strong>{totalXpGained} XP</strong></p>
+          <button onClick={() => navigate('/menu')}>Siguiente (Ir al Menú)</button>
+        </div>
+      </div>,
+      document.getElementById('modal-root')!
+    );
+  };
 
   return (
     <div className="battle-container">
+      <button className="btn-exit" onClick={handleExit}>❌ Salir</button>
+
       <div className="battle-stage">
-        {/* Lado Enemigo */}
-        <div className="enemy-side">
+        <div className="enemy-area">
           <div className="hp-bar">HP: {enemyHP}</div>
-          <img src={enemy.sprites.front_default} alt="enemy" />
-          <p className="name">{enemy.name}</p>
+          {enemy && <img src={enemy.sprites.front_default} className="enemy-sprite" />}
         </div>
 
-        {/* Lado Jugador */}
-        <div className="player-side">
-          <img src={myActivePkmn.sprites.back_default || myActivePkmn.sprites.front_default} alt="me" />
+        <div className="player-area">
+          {myActivePkmn && <img src={myActivePkmn.sprites.back_default || myActivePkmn.sprites.front_default} className="player-sprite" />}
           <div className="hp-bar">HP: {myHP}</div>
-          <p className="name">{myActivePkmn.name}</p>
         </div>
       </div>
 
-      <div className="battle-console">
-        <p>{log}</p>
-        <div className="actions">
-          <button onClick={() => ataqueJugador(15)}>Placaje (15)</button>
-          <button onClick={() => ataqueJugador(25)}>Ataque Especial (25)</button>
-          <button onClick={() => alert("Cambiando Pokémon...")}>Cambiar</button>
-        </div>
+      <div className="battle-controls">
+        <p className="battle-log">{log}</p>
+        
+        {battleStatus === 'fighting' && (
+          <div className="action-grid">
+            <button onClick={() => ataqueJugador(20)}>Ataque A</button>
+            <button onClick={() => ataqueJugador(30)}>Ataque B</button>
+          </div>
+        )}
+
+        {battleStatus === 'won' && (
+          <div className="victory-actions">
+            <button className="btn-continue" onClick={initBattle}>Continuar Peleando ⚔️</button>
+            <button className="btn-finish" onClick={() => setShowModal(true)}>Terminar y ver progreso</button>
+          </div>
+        )}
       </div>
+
+      {showModal && <XPModal />}
     </div>
   );
 };
 
 export default Batalla;
+
 
 
