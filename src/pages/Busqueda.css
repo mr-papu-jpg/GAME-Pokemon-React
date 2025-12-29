@@ -125,4 +125,30 @@
   width: 100%;
   cursor: pointer;
 }
+.btn-nav-criadero {
+  display: inline-block;
+  margin: 10px 0;
+  background-color: #2196f3;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 20px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9rem;
+  box-shadow: 0 4px #1565c0;
+}
+
+.btn-nav-criadero:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px #1565c0;
+}
+
+.back-link {
+  color: #ffcb05;
+  text-decoration: none;
+  position: absolute;
+  left: 20px;
+  top: 20px;
+  font-weight: bold;
+}
 

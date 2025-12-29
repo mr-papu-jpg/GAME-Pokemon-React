@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
@@ -79,7 +80,15 @@ const Busqueda: React.FC = () => {
   return (
     <div className="busqueda-screen">
       <header>
+        {/* Botón para volver al menú principal */}
+        <Link to="/menu" className="back-link">⬅ Menú</Link>
+        
         <h1>Zona de Hierba Alta</h1>
+        
+        {/* AQUÍ PUEDES PONER EL LINK AL CRIADERO */}
+        <Link to="/criadero" className="btn-nav-criadero">
+          🎒 Ver mi Criadero
+        </Link>
         <p>Entrenador: {user?.name} | Nivel: {user?.level}</p>
       </header>
 
