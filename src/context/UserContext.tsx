@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import type { Pokemon, User } from '../interfaces/pokemonTypes';
 
 
@@ -20,37 +20,45 @@ interface UserContextType {
 // 3. Creamos el contexto con un valor inicial indefinido
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// 4. Creamos el Proveedor (Provider)
-export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // --- Lee del LocalStorage al iniciar ---
+  const [user, setUser] = useState<User | null>(() => {
+    const savedData = localStorage.getItem('poke_app_user');
+    return savedData ? JSON.parse(savedData) : null;
+  });
+
+  // --- Guarda automáticamente cuando el estado 'user' cambie ---
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem('poke_app_user', JSON.stringify(user));
+    }
+  }, [user]);
 
   const login = (name: string) => {
     setUser({
       name,
       level: 1,
-      pokemonTeam: [],
+      pokemonTeam: []
+    });
+  };
+
+  const addPokemon = (pokemon: Pokemon) => {
+    setUser((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        pokemonTeam: [...prev.pokemonTeam, pokemon]
+      };
     });
   };
 
   const logout = () => {
+    localStorage.removeItem('poke_app_user'); // Borramos la libreta
     setUser(null);
   };
 
-  const addPokemon = (newPokemon: Pokemon) => {
-    setUser((prev) => {
-        if (!prev) return null;
-    
-        // Usamos el spread operator para crear un nuevo arreglo
-        // y asegurar que React detecte el cambio
-        return {
-        ...prev,
-        pokemonTeam: [...prev.pokemonTeam, newPokemon]
-        };
-    });
-  };      
-
   return (
-    <UserContext.Provider value={{ user, login, logout, addPokemon }}>
+    <UserContext.Provider value={{ user, login, addPokemon, logout }}>
       {children}
     </UserContext.Provider>
   );
