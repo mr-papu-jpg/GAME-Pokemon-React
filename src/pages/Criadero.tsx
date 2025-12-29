@@ -16,6 +16,7 @@ const Criadero: React.FC = () => {
     <div className="criadero-screen">
       <header className="criadero-header">
         <Link to="/menu" className="back-btn">⬅ Volver</Link>
+        <Link to="/busqueda" className="nav-btn btn-hunt">🌿 Ir a Buscar</Link>
         <h1>Mi Criadero</h1>
         <p>Tienes {user?.pokemonTeam.length} Pokémon en tu colección</p>
       </header>

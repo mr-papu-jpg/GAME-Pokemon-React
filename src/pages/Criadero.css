@@ -61,6 +61,52 @@
   gap: 4px;
 }
 
+.criadero-nav {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.nav-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  color: white;
+  font-size: 0.9rem;
+  transition: background 0.3s;
+}
+
+.btn-menu {
+  background-color: #607d8b; /* Gris azulado */
+}
+
+.btn-hunt {
+  background-color: #4caf50; /* Verde */
+}
+
+.nav-btn:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.criadero-footer {
+  margin-top: 30px;
+  text-align: center;
+  padding-bottom: 20px;
+}
+
+.btn-float {
+  background-color: #ff5722;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+
 .mini-type {
   font-size: 0.6rem;
   padding: 2px 6px;
