@@ -12,7 +12,7 @@ interface User {
 // 2. Definimos qué funciones y datos expondrá el Contexto
 interface UserContextType {
   user: User | null;
-  login: (name: string) => void;
+  login: (userData: User) => void;
   addPokemon: (pokemon: Pokemon) => void;
   logout: () => void;
   addExperience: (amount: number) => void;
@@ -33,37 +33,40 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (user) {
       localStorage.setItem('poke_app_user', JSON.stringify(user));
+      
+      // OPCIONAL: Actualizar también la lista global de cuentas para que el progreso se guarde ahí
+      const allAccounts: User[] = JSON.parse(localStorage.getItem('pokemon_accounts') || '[]');
+      const index = allAccounts.findIndex(acc => acc.name === user.name);
+      if (index !== -1) {
+        allAccounts[index] = user;
+        localStorage.setItem('pokemon_accounts', JSON.stringify(allAccounts));
+      }
     }
   }, [user]);
 
-  const login = (name: string) => {
-    setUser({
-      name,
-      level: 1,
-      pokemonTeam: [],
-      currentStage: 1,
-    });
+  // AHORA login recibe el objeto User completo para ser coherente con la selección de cuentas
+  const login = (userData: User) => {
+    setUser(userData);
   };
 
   const addExperience = (amount: number) => {
     setUser(prev => {
-        if (!prev) return null;
-        let newExp = prev.experience + amount;
-        let newLevel = prev.level;
-    
-        // Nivel 1: 100, Nivel 2: 1500, Nivel 3: 22500 (1500 * 15)... 
-        // Nota: El cálculo de XP necesaria sería: 100 * (15 ^ (level - 1))
-        const nextLevelXP = 100 * Math.pow(15, newLevel - 1);
+      if (!prev) return null;
+      // Usamos 0 si experience es undefined para evitar errores NaN
+      let currentExp = prev.experience || 0; 
+      let newExp = currentExp + amount;
+      let newLevel = prev.level;
 
-        if (newExp >= nextLevelXP) {
-            newLevel++;
-            alert(`¡Subiste al nivel ${newLevel}!`);
-        }
+      const nextLevelXP = 100 * Math.pow(15, newLevel - 1);
 
-            return { ...prev, experience: newExp, level: newLevel };
-        });
-    };
+      if (newExp >= nextLevelXP) {
+        newLevel++;
+        alert(`¡Subiste al nivel ${newLevel}!`);
+      }
 
+      return { ...prev, experience: newExp, level: newLevel };
+    });
+  };
 
   const addPokemon = (pokemon: Pokemon) => {
     setUser((prev) => {
@@ -76,7 +79,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const logout = () => {
-    localStorage.removeItem('poke_app_user'); // Borramos la libreta
+    localStorage.removeItem('poke_app_user');
     setUser(null);
   };
 
@@ -86,6 +89,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     </UserContext.Provider>
   );
 };
+
 
 // 5. Hook personalizado para usar el contexto fácilmente
 export const useUser = () => {

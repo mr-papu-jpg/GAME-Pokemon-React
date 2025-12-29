@@ -1,148 +1,181 @@
 import React, { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom';
-import { useUser } from '../context/UserContext';
-import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { useUser } from '../context/UserContext';
+import { useNavigate } from 'react-router-dom';
 import './Batalla.css';
 
 const Batalla: React.FC = () => {
-  const { user, addExperience } = useUser();
-  const navigate = useNavigate();
-  
-  // Estados de Batalla
-  const [enemy, setEnemy] = useState<any>(null);
-  const [myActivePkmn, setMyActivePkmn] = useState<any>(null);
-  const [enemyHP, setEnemyHP] = useState(0);
-  const [myHP, setMyHP] = useState(0);
-  const [log, setLog] = useState("¡Prepárate para la batalla!");
-  const [battleStatus, setBattleStatus] = useState<'fighting' | 'won' | 'lost'>('fighting');
-  const [totalXpGained, setTotalXpGained] = useState(0);
-  const [showModal, setShowModal] = useState(false);
-  const [lastDamageDealt, setLastDamageDealt] = useState<number | null>(null);
-  const [lastDamageReceived, setLastDamageReceived] = useState<number | null>(null);
+    const { user, addExperience } = useUser();
+    const navigate = useNavigate();
 
+    // Estados del Enemigo
+    const [enemy, setEnemy] = useState<any>(null);
+    const [enemyHP, setEnemyHP] = useState(0);
+    const [enemyMaxHP, setEnemyMaxHP] = useState(0);
 
-  // Cargar batalla inicial
-  const initBattle = async () => {
-    const id = Math.floor(Math.random() * 151) + 1;
-    const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`);
-    setEnemy(res.data);
-    setEnemyHP(res.data.stats[0].base_stat * 2);
-    setBattleStatus('fighting');
-    setLog(`¡Un ${res.data.name.toUpperCase()} salvaje apareció!`);
+    // Estados de mi Pokémon
+    const [myActivePkmn, setMyActivePkmn] = useState<any>(null);
+    const [myHP, setMyHP] = useState(0);
+    const [myMaxHP, setMyMaxHP] = useState(0);
 
-    if (user?.pokemonTeam && user.pokemonTeam.length > 0) {
-      const myPkmn = user.pokemonTeam[0];
-      setMyActivePkmn(myPkmn);
-      setMyHP(myPkmn.stats[0].base_stat * 2);
-    }
-  };
+    // Estados de Flujo
+    const [isSelecting, setIsSelecting] = useState(true);
+    const [battleLog, setBattleLog] = useState<string>("¡Un Pokémon salvaje ha aparecido!");
+    const [isPlayerTurn, setIsPlayerTurn] = useState(true);
+    const [isGameOver, setIsGameOver] = useState(false);
 
-  useEffect(() => { initBattle(); }, []);
+    // 1. Cargar enemigo al iniciar
+    useEffect(() => {
+        const fetchEnemy = async () => {
+            try {
+                const randomId = Math.floor(Math.random() * 151) + 1;
+                const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${randomId}`);
+                setEnemy(res.data);
+                const hp = res.data.stats[0].base_stat * 2;
+                setEnemyHP(hp);
+                setEnemyMaxHP(hp);
+            } catch (error) {
+                console.error("Error cargando enemigo", error);
+            }
+        };
+        fetchEnemy();
+    }, []);
 
-  const handleExit = () => {
-    const confirm = window.confirm("¿En verdad quieres cancelar la pelea? Perderás posibles XP.");
-    if (confirm) navigate('/menu');
-  };
+    // 2. Función para seleccionar Pokémon del criadero
+    const handleSelectPokemon = (poke: any) => {
+        setMyActivePkmn(poke);
+        const hp = poke.stats[0].base_stat * 2;
+        setMyHP(hp);
+        setMyMaxHP(hp);
+        setIsSelecting(false);
+        setBattleLog(`¡Adelante, ${poke.name.toUpperCase()}!`);
+    };
 
-  const winBattle = (xp: number) => {
-    addExperience(xp);
-    setTotalXpGained(prev => prev + xp);
-    setBattleStatus('won');
-    setLog(`¡Has derrotado a ${enemy.name}! Ganaste ${xp} XP.`);
-  };
+    // 3. Lógica de Ataque del Jugador
+    const handleAttack = () => {
+        if (!isPlayerTurn || isGameOver) return;
 
-  const ataqueJugador = (daño: number) => {
-    if (battleStatus !== 'fighting') return;
-  
-    setLastDamageDealt(daño); // Guardamos el daño para mostrarlo
-    setLastDamageReceived(null); // Limpiamos el daño previo del enemigo
+        // Calcular daño (basado en stat de ataque)
+        const damage = Math.floor((myActivePkmn.stats[1].base_stat / 5) + Math.random() * 10);
+        const newEnemyHP = Math.max(0, enemyHP - damage);
+        setEnemyHP(newEnemyHP);
+        setBattleLog(`¡${myActivePkmn.name.toUpperCase()} usó Ataque y causó ${damage} de daño!`);
 
-    const nuevaHPEnemigo = Math.max(0, enemyHP - daño);
-    setEnemyHP(nuevaHPEnemigo);
-  
-    if (nuevaHPEnemigo <= 0) {
-        winBattle(10);
-    } else {
-        setTimeout(ataqueEnemigo, 1000);
-    }
-  };
+        if (newEnemyHP === 0) {
+            winBattle();
+        } else {
+            setIsPlayerTurn(false);
+            setTimeout(enemyAttack, 1200);
+        }
+    };
 
-  const ataqueEnemigo = () => {
-    const daño = Math.floor(Math.random() * 15) + 5;
-  
-    setLastDamageReceived(daño); // Guardamos el daño recibido
-    setLastDamageDealt(null); // Limpiamos el daño previo del jugador
+    // 4. Lógica de Ataque del Enemigo
+    const enemyAttack = () => {
+        if (isGameOver) return;
 
-    setMyHP(prev => Math.max(0, prev - daño));
-    if (myHP - daño <= 0) setBattleStatus('lost');
-  };
+        const damage = Math.floor((enemy.stats[1].base_stat / 6) + Math.random() * 8);
+        const newMyHP = Math.max(0, myHP - damage);
+        setMyHP(newMyHP);
+        setBattleLog(`¡El ${enemy.name.toUpperCase()} salvaje contraataca y causa ${damage} de daño!`);
 
+        if (newMyHP === 0) {
+            loseBattle();
+        } else {
+            setIsPlayerTurn(true);
+        }
+    };
 
-  // --- COMPONENTE MODAL (PORTAL) ---
-  const XPModal = () => {
-    return ReactDOM.createPortal(
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <h2>Resumen de Entrenamiento</h2>
-          <p>Experiencia total obtenida: <strong>{totalXpGained} XP</strong></p>
-          <button onClick={() => navigate('/menu')}>Siguiente (Ir al Menú)</button>
+    const winBattle = () => {
+        setIsGameOver(true);
+        setBattleLog(`¡Has derrotado a ${enemy.name.toUpperCase()}!`);
+        const xpGained = enemy.base_experience || 50;
+        addExperience(xpGained);
+        setTimeout(() => {
+            alert(`Ganaste ${xpGained} de experiencia.`);
+            navigate('/menu');
+        }, 2000);
+    };
+
+    const loseBattle = () => {
+        setIsGameOver(true);
+        setBattleLog(`¡${myActivePkmn.name.toUpperCase()} se ha debilitado!`);
+        setTimeout(() => {
+            alert("Has perdido la batalla...");
+            navigate('/menu');
+        }, 2000);
+    };
+
+    return (
+        <div className="battle-screen">
+            {/* MODAL DE SELECCIÓN */}
+            {isSelecting && (
+                <div className="selection-overlay">
+                    <div className="selection-content">
+                        <h2>Selecciona tu Pokémon</h2>
+                        <div className="pokemon-grid">
+                            {user?.pokemonTeam && user.pokemonTeam.length > 0 ? (
+                                user.pokemonTeam.map((poke, index) => (
+                                    <div key={index} className="poke-option" onClick={() => handleSelectPokemon(poke)}>
+                                        <img src={poke.sprites.front_default} alt={poke.name} />
+                                        <p>{poke.name.toUpperCase()}</p>
+                                        <span>HP: {poke.stats[0].base_stat * 2}</span>
+                                    </div>
+                                ))
+                            ) : (
+                                <p>No tienes Pokémon en tu equipo.</p>
+                            )}
+                        </div>
+                        <button className="btn-cancel" onClick={() => navigate('/menu')}>Escapar</button>
+                    </div>
+                </div>
+            )}
+
+            {/* ÁREAS DE COMBATE */}
+            <div className={`battle-layout ${isSelecting ? 'blur' : ''}`}>
+                <div className="enemy-side">
+                    {enemy && (
+                        <div className="pokemon-display">
+                            <div className="hp-container">
+                                <p>{enemy.name.toUpperCase()}</p>
+                                <div className="hp-bar-bg">
+                                    <div className="hp-bar-fill" style={{ width: `${(enemyHP / enemyMaxHP) * 100}%` }}></div>
+                                </div>
+                            </div>
+                            <img src={enemy.sprites.front_default} alt="enemy" className="enemy-img" />
+                        </div>
+                    )}
+                </div>
+
+                <div className="player-side">
+                    {myActivePkmn && (
+                        <div className="pokemon-display">
+                            <img src={myActivePkmn.sprites.back_default || myActivePkmn.sprites.front_default} alt="mine" className="player-img" />
+                            <div className="hp-container">
+                                <p>{myActivePkmn.name.toUpperCase()}</p>
+                                <div className="hp-bar-bg">
+                                    <div className="hp-bar-fill player-hp" style={{ width: `${(myHP / myMaxHP) * 100}%` }}></div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                {/* LOG Y CONTROLES */}
+                <div className="battle-footer">
+                    <div className="battle-log">
+                        <p>{battleLog}</p>
+                    </div>
+                    {!isGameOver && !isSelecting && (
+                        <div className="battle-actions">
+                            <button onClick={handleAttack} disabled={!isPlayerTurn}>ATACAR</button>
+                            <button onClick={() => navigate('/menu')}>HUIR</button>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
-      </div>,
-      document.getElementById('modal-root')!
     );
-  };
-
-  return (
-    <div className="battle-container">
-      <button className="btn-exit" onClick={handleExit}>❌ Salir</button>
-
-      <div className="battle-stage">
-        <div className="enemy-area">
-          <div className="hp-bar">HP: {enemyHP}</div>
-          {enemy && <img src={enemy.sprites.front_default} className="enemy-sprite" />}
-        </div>
-
-        <div className="player-area">
-          {myActivePkmn && <img src={myActivePkmn.sprites.back_default || myActivePkmn.sprites.front_default} className="player-sprite" />}
-          <div className="hp-bar">HP: {myHP}</div>
-        </div>
-      </div>
-
-      <div className="battle-controls">
-        <p className="battle-log">{log}</p>
-        <div className="damage-display">
-            {lastDamageDealt && (
-                <p className="damage-indicator player-dmg">¡Tu Pokémon causó {lastDamageDealt} de daño!</p>
-            )}
-            {lastDamageReceived && (
-                <p className="damage-indicator enemy-dmg">¡El enemigo causó {lastDamageReceived} de daño!</p>
-            )}
-        </div>
-
-  <p className="battle-log">{log}</p>
-        
-        {battleStatus === 'fighting' && (
-          <div className="action-grid">
-            <button onClick={() => ataqueJugador(20)}>Ataque A</button>
-            <button onClick={() => ataqueJugador(30)}>Ataque B</button>
-          </div>
-        )}
-
-        {battleStatus === 'won' && (
-          <div className="victory-actions">
-            <button className="btn-continue" onClick={initBattle}>Continuar Peleando ⚔️</button>
-            <button className="btn-finish" onClick={() => setShowModal(true)}>Terminar y ver progreso</button>
-          </div>
-        )}
-      </div>
-
-      {showModal && <XPModal />}
-    </div>
-  );
 };
 
 export default Batalla;
-
-
 
