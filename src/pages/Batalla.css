@@ -1,4 +1,5 @@
 .battle-container {
+  width: 100vw;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -22,9 +23,11 @@
   flex: 2;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .enemy-area {
+  width: 100%;  
   flex: 1;
   background: #78c850; /* Verde campo */
   display: flex;
@@ -35,6 +38,7 @@
 }
 
 .player-area {
+  width: 100%;  
   flex: 1;
   background: #e0e0e0; /* GRIS CLARO solicitado */
   display: flex;
@@ -54,8 +58,13 @@
   z-index: 1000;
 }
 
+@keyframes bounce {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-20px); opacity: 0; }
+}
+
 .modal-content {
-  background: white;
+  background: gray;
   padding: 30px;
   border-radius: 15px;
   text-align: center;
@@ -71,4 +80,22 @@
 
 .btn-continue { background: #4caf50; color: white; padding: 10px; border-radius: 5px; border: none; }
 .btn-finish { background: #2196f3; color: white; padding: 10px; border-radius: 5px; border: none; }
+
+.damage-indicator {
+  font-weight: bold;
+  font-size: 1.5rem;
+  color: #ff1744;
+  text-shadow: 1px 1px 2px black;
+  margin: 5px 0;
+  animation: bounce 0.5s ease;
+}
+
+.enemy-sprite, .player-sprite {
+  height: 150px; /* Ajusta según el tamaño de pantalla de Termux */
+  object-fit: contain;
+}
+
+.player-area {
+  border-top: 4px solid #bdbdbd; /* Separación visual entre áreas */
+}
 

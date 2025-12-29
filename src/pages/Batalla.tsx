@@ -18,6 +18,9 @@ const Batalla: React.FC = () => {
   const [battleStatus, setBattleStatus] = useState<'fighting' | 'won' | 'lost'>('fighting');
   const [totalXpGained, setTotalXpGained] = useState(0);
   const [showModal, setShowModal] = useState(false);
+  const [lastDamageDealt, setLastDamageDealt] = useState<number | null>(null);
+  const [lastDamageReceived, setLastDamageReceived] = useState<number | null>(null);
+
 
   // Cargar batalla inicial
   const initBattle = async () => {
@@ -51,20 +54,30 @@ const Batalla: React.FC = () => {
 
   const ataqueJugador = (daño: number) => {
     if (battleStatus !== 'fighting') return;
+  
+    setLastDamageDealt(daño); // Guardamos el daño para mostrarlo
+    setLastDamageReceived(null); // Limpiamos el daño previo del enemigo
+
     const nuevaHPEnemigo = Math.max(0, enemyHP - daño);
     setEnemyHP(nuevaHPEnemigo);
+  
     if (nuevaHPEnemigo <= 0) {
-      winBattle(10); // XP base por ahora
+        winBattle(10);
     } else {
-      setTimeout(ataqueEnemigo, 800);
+        setTimeout(ataqueEnemigo, 1000);
     }
   };
 
   const ataqueEnemigo = () => {
     const daño = Math.floor(Math.random() * 15) + 5;
+  
+    setLastDamageReceived(daño); // Guardamos el daño recibido
+    setLastDamageDealt(null); // Limpiamos el daño previo del jugador
+
     setMyHP(prev => Math.max(0, prev - daño));
     if (myHP - daño <= 0) setBattleStatus('lost');
   };
+
 
   // --- COMPONENTE MODAL (PORTAL) ---
   const XPModal = () => {
@@ -98,6 +111,16 @@ const Batalla: React.FC = () => {
 
       <div className="battle-controls">
         <p className="battle-log">{log}</p>
+        <div className="damage-display">
+            {lastDamageDealt && (
+                <p className="damage-indicator player-dmg">¡Tu Pokémon causó {lastDamageDealt} de daño!</p>
+            )}
+            {lastDamageReceived && (
+                <p className="damage-indicator enemy-dmg">¡El enemigo causó {lastDamageReceived} de daño!</p>
+            )}
+        </div>
+
+  <p className="battle-log">{log}</p>
         
         {battleStatus === 'fighting' && (
           <div className="action-grid">
