@@ -42,6 +42,26 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
+  const addExperience = (amount: number) => {
+    setUser(prev => {
+        if (!prev) return null;
+        let newExp = prev.experience + amount;
+        let newLevel = prev.level;
+    
+        // Nivel 1: 100, Nivel 2: 1500, Nivel 3: 22500 (1500 * 15)... 
+        // Nota: El cálculo de XP necesaria sería: 100 * (15 ^ (level - 1))
+        const nextLevelXP = 100 * Math.pow(15, newLevel - 1);
+
+        if (newExp >= nextLevelXP) {
+            newLevel++;
+            alert(`¡Subiste al nivel ${newLevel}!`);
+        }
+
+            return { ...prev, experience: newExp, level: newLevel };
+        });
+    };
+
+
   const addPokemon = (pokemon: Pokemon) => {
     setUser((prev) => {
       if (!prev) return null;
