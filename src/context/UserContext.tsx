@@ -40,7 +40,8 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser({
       name,
       level: 1,
-      pokemonTeam: []
+      pokemonTeam: [],
+      currentStage: 1,
     });
   };
 

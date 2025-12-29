@@ -1,0 +1,83 @@
+.map-path {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 50px;
+  background: #222;
+  overflow-x: auto;
+}
+
+.stage-node {
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+.node-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #555;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+}
+
+.stage-node.passed .node-circle {
+  background: #111; /* Fase pasada oscura */
+  color: #444;
+}
+
+.stage-node.active .node-circle {
+  background: #ffcb05;
+  color: #000;
+  box-shadow: 0 0 15px #ffcb05;
+  transform: scale(1.2);
+}
+
+.arrow-indicator {
+  position: absolute;
+  top: -30px;
+  font-size: 1.5rem;
+  animation: bounce 1s infinite;
+}
+
+.path-line {
+  width: 40px;
+  height: 4px;
+  background: #444;
+}
+
+/* MODAL STYLES */
+.selection-modal {
+  background: #333;
+  width: 90%;
+  max-width: 500px;
+  height: 80vh;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+}
+
+.pokemon-scroll-list {
+  flex: 1;
+  overflow-y: auto; /* SCROLL para lista larga */
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.poke-card-select.selected {
+  border: 3px solid #ffcb05;
+  background: #444;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
