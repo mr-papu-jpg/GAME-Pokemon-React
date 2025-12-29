@@ -99,3 +99,10 @@
   border-top: 4px solid #bdbdbd; /* Separación visual entre áreas */
 }
 
+.dead { background: red; } 
+
+.dot { 
+    width: 10px; 
+    height: 10px; 
+    border-radius: 50%; 
+}

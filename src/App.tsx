@@ -7,6 +7,7 @@ import Busqueda from './pages/Busqueda';
 import Criadero from './pages/Criadero';
 import Batalla from './pages/Batalla';
 import Competencia from './pages/Competencia';
+import BatallaCompetencia from './pages/BatallaCompetencia';
 
 const App: React.FC = () => {
   return (
@@ -20,6 +21,7 @@ const App: React.FC = () => {
                 <Route path="/batalla" element={<Batalla />} />
                 <Route path="/competencia" element={<Competencia />} />
                 <Route path="*" element={<Navigate to="/" />} />
+                <Route path="/batalla-competencia" element={<BatallaCompetencia />} />
             </Routes>
         </BrowserRouter>
     </UserProvider>
