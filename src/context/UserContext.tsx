@@ -12,6 +12,7 @@ interface User {
 // 2. Definimos qué funciones y datos expondrá el Contexto
 interface UserContextType {
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   login: (userData: User) => void;
   addPokemon: (pokemon: Pokemon) => void;
   logout: () => void;
@@ -114,7 +115,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <UserContext.Provider value={{ user, login, addPokemon, logout, addExperience }}>
+    <UserContext.Provider value={{ user, setUser, login, addPokemon, logout, addExperience }}>
       {children}
     </UserContext.Provider>
   );
