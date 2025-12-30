@@ -11,13 +11,12 @@ const Login: React.FC = () => {
   const [savedAccounts, setSavedAccounts] = useState<User[]>([]);
   const { login } = useUser();
   const navigate = useNavigate();
-  const [selectedStarter, setSelectedStarter] = useState<string | null>(null);
-const starters = [
-  { id: 1, name: 'Bulbasaur', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png' },
-  { id: 4, name: 'Charmander', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png' },
-  { id: 7, name: 'Squirtle', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png' }
-];
-
+  
+  const starters = [
+    { id: 1, name: 'Bulbasaur', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png' },
+    { id: 4, name: 'Charmander', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png' },
+    { id: 7, name: 'Squirtle', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png' }
+  ];
 
   // Cargar cuentas del LocalStorage al iniciar
   useEffect(() => {
@@ -33,23 +32,39 @@ const starters = [
         const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${starterId}`);
         const starterPokemon = res.data;
 
+        // NUEVO: Definimos el objeto con la economía inicial
         const newUser: User = {
             name: newName,
-            pokemonTeam: [starterPokemon], // El equipo empieza con el elegido
+            pokemonTeam: [starterPokemon],
             experience: 0,
             level: 1,
-            currentStage: 1
+            currentStage: 1,
+            gold: 0, // Empezamos sin dinero (lo ganará en batallas)
+            inventory: {
+                pokeballs: { 
+                  sencilla: 3, // Regalo inicial de 3 pokébolas
+                  normal: 0, 
+                  maestra: 0 
+                },
+                potions: {
+                    healing: { sencilla: 0, normal: 0, avanzada: 0 },
+                    damage: { sencilla: 0, normal: 0, avanzada: 0 },
+                    defense: { sencilla: 0, normal: 0, avanzada: 0 }
+                }
+            }
         };
 
         const updatedAccounts = [...savedAccounts, newUser];
         localStorage.setItem('pokemon_accounts', JSON.stringify(updatedAccounts));
+        
+        // El login del context se encargará de ponerlo como usuario activo
         login(newUser);
         navigate('/menu');
     } catch (error) {
-        alert("Error al obtener el Pokémon inicial");
+        console.error("Error al crear cuenta:", error);
+        alert("Error al obtener el Pokémon inicial. Revisa tu conexión.");
     }
   };
-
 
   const handleSelectAccount = (user: User) => {
     login(user);
@@ -70,14 +85,14 @@ const starters = [
       {view === 'crear' && (
         <div className="form-group">
             <h2>Nuevo Entrenador</h2>
-            <input 
-                type="text" 
-                placeholder="Tu nombre..." 
-                value={newName} 
+            <input
+                type="text"
+                placeholder="Tu nombre..."
+                value={newName}
                 onChange={(e) => setNewName(e.target.value)}
                 className="login-input"
             />
-    
+
             <p>Elige tu compañero inicial:</p>
             <div className="starter-selector">
                 {starters.map(s => (
@@ -87,11 +102,10 @@ const starters = [
                     </div>
                 ))}
             </div>
-    
+
             <button onClick={() => setView('menu')} className="btn-back">Volver</button>
         </div>
       )}
-
 
       {view === 'ingresar' && (
         <div className="accounts-list">
@@ -99,7 +113,10 @@ const starters = [
           {savedAccounts.length > 0 ? (
             savedAccounts.map((acc, idx) => (
               <div key={idx} className="account-card" onClick={() => handleSelectAccount(acc)}>
-                <span>{acc.name}</span>
+                <div className="account-info">
+                  <span className="name">{acc.name}</span>
+                  <span className="money">💰 {acc.gold || 0} Gs</span>
+                </div>
                 <small>Nivel {acc.level} - Fase {acc.currentStage}</small>
               </div>
             ))

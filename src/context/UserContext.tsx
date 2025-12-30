@@ -46,8 +46,38 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // AHORA login recibe el objeto User completo para ser coherente con la selección de cuentas
   const login = (userData: User) => {
-    setUser(userData);
+  // Si es un usuario nuevo (no tiene inventario), le damos el kit inicial
+  const completeUser = {
+    ...userData,
+    gold: userData.gold ?? 0,
+    inventory: userData.inventory || {
+      pokeballs: { sencilla: 3, normal: 0, maestra: 0 }, // 3 Pokebolas iniciales
+      potions: {
+        healing: { sencilla: 0, normal: 0, avanzada: 0 },
+        damage: { sencilla: 0, normal: 0, avanzada: 0 },
+        defense: { sencilla: 0, normal: 0, avanzada: 0 }
+      }
+    }
   };
+  setUser(completeUser);
+  };
+
+  // Función para ganar/gastar Gs
+  const updateGold = (amount: number) => {
+    setUser(prev => prev ? { ...prev, gold: prev.gold + amount  } : null);
+  };
+
+// Función para comprar objetos
+  const buyItem = (category: keyof Inventory, type: string, subType: string, price: number) => {
+    setUser(prev => {
+        if (!prev || prev.gold < price) return prev;
+        const newInventory = { ...prev.inventory };
+        // @ts-ignore (Para simplificar el acceso dinámico al objeto)
+        newInventory[category][type][subType] += 1;
+        return { ...prev, gold: prev.gold - price, inventory: newInventory };
+    });
+  };
+
 
   const addExperience = (amount: number) => {
     setUser(prev => {

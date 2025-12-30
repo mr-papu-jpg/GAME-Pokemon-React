@@ -8,6 +8,7 @@ import Criadero from './pages/Criadero';
 import Batalla from './pages/Batalla';
 import Competencia from './pages/Competencia';
 import BatallaCompetencia from './pages/BatallaCompetencia';
+import Tienda from './pages/Tienda';
 
 const App: React.FC = () => {
   return (
@@ -22,6 +23,7 @@ const App: React.FC = () => {
                 <Route path="/competencia" element={<Competencia />} />
                 <Route path="*" element={<Navigate to="/" />} />
                 <Route path="/batalla-competencia" element={<BatallaCompetencia />} />
+                <Route path='/tienda' element={<Tienda />} />
             </Routes>
         </BrowserRouter>
     </UserProvider>

@@ -5,7 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import './Batalla.css';
 
 const Batalla: React.FC = () => {
-    const { user, addExperience } = useUser();
+    // Extraemos setUser para poder actualizar el oro y experiencia directamente
+    const { user, setUser, addExperience } = useUser();
     const navigate = useNavigate();
 
     // Estados del Enemigo
@@ -53,9 +54,8 @@ const Batalla: React.FC = () => {
 
     // 3. Lógica de Ataque del Jugador
     const handleAttack = () => {
-        if (!isPlayerTurn || isGameOver) return;
+        if (!isPlayerTurn || isGameOver || !myActivePkmn) return;
 
-        // Calcular daño (basado en stat de ataque)
         const damage = Math.floor((myActivePkmn.stats[1].base_stat / 5) + Math.random() * 10);
         const newEnemyHP = Math.max(0, enemyHP - damage);
         setEnemyHP(newEnemyHP);
@@ -71,7 +71,7 @@ const Batalla: React.FC = () => {
 
     // 4. Lógica de Ataque del Enemigo
     const enemyAttack = () => {
-        if (isGameOver) return;
+        if (isGameOver || !enemy) return;
 
         const damage = Math.floor((enemy.stats[1].base_stat / 6) + Math.random() * 8);
         const newMyHP = Math.max(0, myHP - damage);
@@ -88,17 +88,37 @@ const Batalla: React.FC = () => {
     const winBattle = () => {
         setIsGameOver(true);
         setBattleLog(`¡Has derrotado a ${enemy.name.toUpperCase()}!`);
-        const xpGained = enemy.base_experience || 50;
-        addExperience(xpGained);
+
+        // Lógica de rareza basada en Experiencia Base de la API
+        // Común: < 100 XP, Raro: 100-199 XP, Legendario: > 200 XP
+        let goldGained = 12; 
+        const baseExp = enemy.base_experience || 50;
+
+        if (baseExp >= 200) {
+            goldGained = 120; // Legendario
+        } else if (baseExp >= 100) {
+            goldGained = 31;  // Raro
+        }
+
+        // Actualizamos el estado global del usuario (Oro y XP)
+        setUser(prev => {
+            if (!prev) return null;
+            return {
+                ...prev,
+                gold: (prev.gold || 0) + goldGained,
+                experience: prev.experience + baseExp
+            };
+        });
+
         setTimeout(() => {
-            alert(`Ganaste ${xpGained} de experiencia.`);
+            alert(`¡Victoria!\n+${baseExp} XP\n+${goldGained} Gs`);
             navigate('/menu');
         }, 2000);
     };
 
     const loseBattle = () => {
         setIsGameOver(true);
-        setBattleLog(`¡${myActivePkmn.name.toUpperCase()} se ha debilitado!`);
+        setBattleLog(`¡Tu Pokémon ha caído!`);
         setTimeout(() => {
             alert("Has perdido la batalla...");
             navigate('/menu');
@@ -107,6 +127,9 @@ const Batalla: React.FC = () => {
 
     return (
         <div className="battle-screen">
+            {/* Indicador de Oro superior */}
+            <div className="battle-gold-status">{user?.gold || 0} Gs</div>
+
             {/* MODAL DE SELECCIÓN */}
             {isSelecting && (
                 <div className="selection-overlay">
@@ -136,10 +159,11 @@ const Batalla: React.FC = () => {
                     {enemy && (
                         <div className="pokemon-display">
                             <div className="hp-container">
-                                <p>{enemy.name.toUpperCase()}</p>
+                                <p className="pkmn-name">{enemy.name.toUpperCase()}</p>
                                 <div className="hp-bar-bg">
                                     <div className="hp-bar-fill" style={{ width: `${(enemyHP / enemyMaxHP) * 100}%` }}></div>
                                 </div>
+                                <small>{enemyHP} / {enemyMaxHP}</small>
                             </div>
                             <img src={enemy.sprites.front_default} alt="enemy" className="enemy-img" />
                         </div>
@@ -151,10 +175,11 @@ const Batalla: React.FC = () => {
                         <div className="pokemon-display">
                             <img src={myActivePkmn.sprites.back_default || myActivePkmn.sprites.front_default} alt="mine" className="player-img" />
                             <div className="hp-container">
-                                <p>{myActivePkmn.name.toUpperCase()}</p>
+                                <p className="pkmn-name">{myActivePkmn.name.toUpperCase()}</p>
                                 <div className="hp-bar-bg">
                                     <div className="hp-bar-fill player-hp" style={{ width: `${(myHP / myMaxHP) * 100}%` }}></div>
                                 </div>
+                                <small>{myHP} / {myMaxHP}</small>
                             </div>
                         </div>
                     )}
@@ -167,8 +192,8 @@ const Batalla: React.FC = () => {
                     </div>
                     {!isGameOver && !isSelecting && (
                         <div className="battle-actions">
-                            <button onClick={handleAttack} disabled={!isPlayerTurn}>ATACAR</button>
-                            <button onClick={() => navigate('/menu')}>HUIR</button>
+                            <button className="atk-btn" onClick={handleAttack} disabled={!isPlayerTurn}>ATACAR</button>
+                            <button className="run-btn" onClick={() => navigate('/menu')}>HUIR</button>
                         </div>
                     )}
                 </div>

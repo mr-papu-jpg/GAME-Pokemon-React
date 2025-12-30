@@ -81,3 +81,34 @@
   50% { transform: translateY(-10px); }
 }
 
+.user-gold-badge {
+  background: #ffcb05;
+  color: #3c5aa6;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  border: 2px solid #3c5aa6;
+}
+
+.reward-tag {
+  color: #2ecc71;
+  font-weight: bold;
+  margin: 10px 0;
+  font-size: 1.1rem;
+}
+
+.missing-count {
+  color: #e74c3c;
+  font-size: 0.8rem;
+}
+
+.bounce {
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+  40% {transform: translateY(-5px);}
+  60% {transform: translateY(-3px);}
+}
+

@@ -7,10 +7,21 @@ export type Pokemon = {
   currentStage: number;
 }
 
-export type User = {
-  name: string;
-  level: number;
-  experience: number;
-  pokemonTeam: Pokemon[];
+export type Inventory = {
+  pokeballs: { sencilla: number; normal: number; maestra: number };
+  potions: {
+    healing: { sencilla: number; normal: number; avanzada: number };
+    damage: { sencilla: number; normal: number; avanzada: number };
+    defense: { sencilla: number; normal: number; avanzada: number };
+  };
 }
 
+export type User = {
+  name: string;
+  pokemonTeam: any[];
+  experience: number;
+  level: number;
+  currentStage: number;
+  gold: number;
+  inventory: Inventory;
+}
