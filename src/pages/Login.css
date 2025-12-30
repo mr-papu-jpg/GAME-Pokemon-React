@@ -59,3 +59,49 @@
   border-radius: 5px;
 }
 
+
+.starter-selector {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 15px 0;
+}
+
+.starter-card {
+  background: #333;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  padding: 10px;
+  cursor: pointer;
+  transition: 0.3s;
+  text-align: center;
+  flex: 1;
+}
+
+.starter-card:hover {
+  background: #444;
+  border-color: #ffcb05;
+  transform: translateY(-5px);
+}
+
+.starter-card img {
+  width: 60px;
+  height: 60px;
+}
+
+.starter-card span {
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 5px;
+  color: #ffcb05;
+}
+
+.login-input {
+  padding: 12px;
+  border-radius: 5px;
+  border: none;
+  margin-bottom: 10px;
+  background: #eee;
+  color: #333;
+}
+

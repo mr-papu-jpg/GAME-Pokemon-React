@@ -10,6 +10,13 @@ const Login: React.FC = () => {
   const [savedAccounts, setSavedAccounts] = useState<User[]>([]);
   const { login } = useUser();
   const navigate = useNavigate();
+  const [selectedStarter, setSelectedStarter] = useState<string | null>(null);
+const starters = [
+  { id: 1, name: 'Bulbasaur', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png' },
+  { id: 4, name: 'Charmander', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png' },
+  { id: 7, name: 'Squirtle', img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png' }
+];
+
 
   // Cargar cuentas del LocalStorage al iniciar
   useEffect(() => {
@@ -17,22 +24,31 @@ const Login: React.FC = () => {
     setSavedAccounts(accounts);
   }, []);
 
-  const handleCreateAccount = () => {
+  const handleCreateAccount = async (starterId: number) => {
     if (!newName.trim()) return alert("Escribe un nombre");
-    
-    const newUser: User = {
-      name: newName,
-      pokemonTeam: [],
-      experience: 0,
-      level: 1,
-      currentStage: 1
-    };
 
-    const updatedAccounts = [...savedAccounts, newUser];
-    localStorage.setItem('pokemon_accounts', JSON.stringify(updatedAccounts));
-    login(newUser);
-    navigate('/menu');
+    try {
+        // Obtenemos los datos completos del inicial elegido
+        const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${starterId}`);
+        const starterPokemon = res.data;
+
+        const newUser: User = {
+            name: newName,
+            pokemonTeam: [starterPokemon], // El equipo empieza con el elegido
+            experience: 0,
+            level: 1,
+            currentStage: 1
+        };
+
+        const updatedAccounts = [...savedAccounts, newUser];
+        localStorage.setItem('pokemon_accounts', JSON.stringify(updatedAccounts));
+        login(newUser);
+        navigate('/menu');
+    } catch (error) {
+        alert("Error al obtener el Pokémon inicial");
+    }
   };
+
 
   const handleSelectAccount = (user: User) => {
     login(user);
@@ -52,17 +68,29 @@ const Login: React.FC = () => {
 
       {view === 'crear' && (
         <div className="form-group">
-          <h2>Nuevo Entrenador</h2>
-          <input 
-            type="text" 
-            placeholder="Tu nombre..." 
-            value={newName} 
-            onChange={(e) => setNewName(e.target.value)}
-          />
-          <button onClick={handleCreateAccount} className="btn-confirm">Empezar Aventura</button>
-          <button onClick={() => setView('menu')} className="btn-back">Volver</button>
+            <h2>Nuevo Entrenador</h2>
+            <input 
+                type="text" 
+                placeholder="Tu nombre..." 
+                value={newName} 
+                onChange={(e) => setNewName(e.target.value)}
+                className="login-input"
+            />
+    
+            <p>Elige tu compañero inicial:</p>
+            <div className="starter-selector">
+                {starters.map(s => (
+                    <div key={s.id} className="starter-card" onClick={() => handleCreateAccount(s.id)}>
+                        <img src={s.img} alt={s.name} />
+                        <span>{s.name}</span>
+                    </div>
+                ))}
+            </div>
+    
+            <button onClick={() => setView('menu')} className="btn-back">Volver</button>
         </div>
       )}
+
 
       {view === 'ingresar' && (
         <div className="accounts-list">
