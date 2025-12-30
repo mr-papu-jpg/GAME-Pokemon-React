@@ -1,12 +1,30 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
 .busqueda-screen {
+  width: 100vw; /* Usamos vw pero con un ajuste de seguridad */
   min-height: 100vh;
-  background: linear-gradient(180deg, #2e7d32 0%, #1b5e20 100%); /* Verde hierba */
-  color: white;
+  margin: 0;
   padding: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  box-sizing: border-box; /* Fundamental */
+  position: relative;
+  overflow-x: hidden; /* Doble seguridad */
+}
+
+
+.busqueda-header {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  margin-bottom: 20px;
 }
 
 .encounter-area {
@@ -25,9 +43,13 @@
   padding: 20px;
   border-radius: 20px;
   box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-  width: 250px;
   position: relative;
   animation: spawn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  width: 280px;
+  padding-bottom: 25px;
+  width: 90%; /* Porcentual para móviles */
+  max-width: 300px; /* Pero que no crezca más de esto en PC */
+  margin: 0 auto;
 }
 
 @keyframes spawn {
@@ -115,16 +137,55 @@
   box-shadow: 0 1px 0 #c7a008;
 }
 
-.catch-btn {
-  margin-top: 15px;
-  background: #3b4cca;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 10px;
-  width: 100%;
-  cursor: pointer;
+.catch-options {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #ddd;
 }
+
+.catch-options p {
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #666;
+}
+
+.ball-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ball-buttons button {
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+}
+
+/* Colores específicos por bola */
+.ball-buttons button:nth-child(1) { background-color: #ff5252; border-bottom: 4px solid #b71c1c; } /* Sencilla */
+.ball-buttons button:nth-child(2) { background-color: #448aff; border-bottom: 4px solid #1976d2; } /* Normal */
+.ball-buttons button:nth-child(3) { background-color: #7e57c2; border-bottom: 4px solid #5e35b1; } /* Maestra */
+
+.ball-buttons button:disabled {
+  background-color: #ccc !important;
+  border-bottom: 4px solid #999 !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.ball-buttons button:active:not(:disabled) {
+  transform: translateY(2px);
+  border-bottom-width: 2px;
+}
+
+
+
 .btn-nav-criadero {
   display: inline-block;
   margin: 10px 0;
@@ -147,8 +208,34 @@
   color: #ffcb05;
   text-decoration: none;
   position: absolute;
-  left: 20px;
-  top: 20px;
+  left: 0; /* Ajustado para que pegue al borde del padding */
+  top: 0;
   font-weight: bold;
+  z-index: 10;
+}
+
+.inventory-status {
+  display: flex;
+  gap: 15px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px 15px;
+  border-radius: 20px;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.inventory-status span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pkmn-bounce {
+  animation: pkmn-jump 0.8s infinite alternate ease-in-out;
+}
+
+@keyframes pkmn-jump {
+  from { transform: translateY(0); }
+  to { transform: translateY(-10px); }
 }
 

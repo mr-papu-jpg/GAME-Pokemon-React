@@ -1,9 +1,20 @@
-.criadero-screen {
-  min-height: 100vh;
-  background-color: #2c3e50;
-  color: white;
-  padding: 20px;
+* {
+  box-sizing: border-box;
 }
+
+.criadero-screen {
+  width: 100vw; /* Usamos vw pero con un ajuste de seguridad */
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-sizing: border-box; /* Fundamental */
+  position: relative;
+  overflow-x: hidden; /* Doble seguridad */
+}
+
 
 .criadero-header {
   display: flex;
@@ -11,6 +22,7 @@
   align-items: center;
   margin-bottom: 30px;
   position: relative;
+  text-align: center;
 }
 
 .back-btn {
@@ -27,26 +39,32 @@
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 15px;
   width: 100%;
-  padding: 20px 0;
+  padding: 10px 0;
   min-height: 200px;
+  margin: 0 auto;
 }
 
 .mini-pokemon-card {
   background: white !important; /* Forzar el fondo para ver si aparecen */
+  color: #333;
   display: flex !important;
   flex-direction: column;
   align-items: center;
   border-radius: 15px;
-  padding: 10px;
+  padding: 15px 10px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  transition: transform 0.2s ease;
 }
 
 .mini-pokemon-card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
 
 .mini-pokemon-card img {
-  width: 80px;
+  width: 90px;
+  height: 90px;
+  object-fit: contain;
   image-rendering: pixelated;
 }
 
@@ -108,11 +126,13 @@
 
 
 .mini-type {
-  font-size: 0.6rem;
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 10px;
   color: white;
   text-transform: uppercase;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.2);
 }
 
 .empty-msg {
@@ -132,3 +152,11 @@
   font-weight: bold;
 }
 
+/* Clases de utilidad para tipos (puedes añadir más) */
+.grass { background: #78C850; }
+.fire { background: #F08030; }
+.water { background: #6890F0; }
+.bug { background: #A8B820; }
+.normal { background: #A8A878; }
+.poison { background: #A040A0; }
+.electric { background: #F8D030; }
