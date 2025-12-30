@@ -160,3 +160,120 @@
 .normal { background: #A8A878; }
 .poison { background: #A040A0; }
 .electric { background: #F8D030; }
+
+/* --- Barra de Vida en las Cartas --- */
+.hp-bar-container {
+  width: 80%;
+  height: 8px;
+  background-color: #e0e0e0;
+  border-radius: 10px;
+  margin: 5px 0;
+  overflow: hidden;
+  border: 1px solid #ccc;
+}
+
+.hp-bar-fill {
+  height: 100%;
+  transition: width 0.4s ease-out, background-color 0.3s;
+}
+
+.hp-text {
+  font-size: 0.7rem;
+  font-weight: bold;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+/* Estado debilitado */
+.mini-pokemon-card.fainted {
+  filter: grayscale(0.8);
+  opacity: 0.8;
+  border: 2px solid #ff5252;
+}
+
+/* --- Modal de Curación --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.heal-modal {
+  background: white;
+  width: 90%;
+  max-width: 350px;
+  padding: 25px;
+  border-radius: 20px;
+  text-align: center;
+  color: #333;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes modalPop {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.close-modal {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #999;
+}
+
+.heal-modal img {
+  width: 120px;
+  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+}
+
+/* --- Lista de Pociones --- */
+.potion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.potion-list button {
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #f0f0f0;
+  color: #444;
+  border-bottom: 3px solid #ccc;
+}
+
+.potion-list button:not(:disabled):hover {
+  background: #e3f2fd;
+  transform: translateY(-2px);
+}
+
+/* Colores por tipo de poción */
+.potion-list button:nth-child(1):not(:disabled) { border-color: #81c784; } /* Sencilla */
+.potion-list button:nth-child(2):not(:disabled) { border-color: #64b5f6; } /* Súper */
+.potion-list button:nth-child(3):not(:disabled) { border-color: #ba68c8; } /* Máxima */
+
+.potion-list button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+

@@ -5,27 +5,22 @@ import { useNavigate } from 'react-router-dom';
 import './Batalla.css';
 
 const Batalla: React.FC = () => {
-    // Extraemos setUser para poder actualizar el oro y experiencia directamente
-    const { user, setUser, addExperience } = useUser();
+    const { user, setUser } = useUser();
     const navigate = useNavigate();
 
-    // Estados del Enemigo
     const [enemy, setEnemy] = useState<any>(null);
     const [enemyHP, setEnemyHP] = useState(0);
     const [enemyMaxHP, setEnemyMaxHP] = useState(0);
 
-    // Estados de mi Pokémon
     const [myActivePkmn, setMyActivePkmn] = useState<any>(null);
     const [myHP, setMyHP] = useState(0);
     const [myMaxHP, setMyMaxHP] = useState(0);
 
-    // Estados de Flujo
     const [isSelecting, setIsSelecting] = useState(true);
     const [battleLog, setBattleLog] = useState<string>("¡Un Pokémon salvaje ha aparecido!");
     const [isPlayerTurn, setIsPlayerTurn] = useState(true);
     const [isGameOver, setIsGameOver] = useState(false);
 
-    // 1. Cargar enemigo al iniciar
     useEffect(() => {
         const fetchEnemy = async () => {
             try {
@@ -42,17 +37,22 @@ const Batalla: React.FC = () => {
         fetchEnemy();
     }, []);
 
-    // 2. Función para seleccionar Pokémon del criadero
     const handleSelectPokemon = (poke: any) => {
+        // Validar si el Pokémon tiene vida antes de dejarlo entrar
+        const currentHp = poke.currentHp !== undefined ? poke.currentHp : poke.stats[0].base_stat * 2;
+        
+        if (currentHp <= 0) {
+            alert("¡Este Pokémon está debilitado y no puede luchar!");
+            return;
+        }
+
         setMyActivePkmn(poke);
-        const hp = poke.stats[0].base_stat * 2;
-        setMyHP(hp);
-        setMyMaxHP(hp);
+        setMyHP(currentHp);
+        setMyMaxHP(poke.stats[0].base_stat * 2);
         setIsSelecting(false);
         setBattleLog(`¡Adelante, ${poke.name.toUpperCase()}!`);
     };
 
-    // 3. Lógica de Ataque del Jugador
     const handleAttack = () => {
         if (!isPlayerTurn || isGameOver || !myActivePkmn) return;
 
@@ -69,7 +69,6 @@ const Batalla: React.FC = () => {
         }
     };
 
-    // 4. Lógica de Ataque del Enemigo
     const enemyAttack = () => {
         if (isGameOver || !enemy) return;
 
@@ -85,30 +84,40 @@ const Batalla: React.FC = () => {
         }
     };
 
+    // Función unificada para guardar TODO el progreso
+    const finalizeBattle = (finalMyHp: number, xpGained: number, goldGained: number) => {
+        setUser(prev => {
+            if (!prev) return null;
+            
+            const updatedTeam = prev.pokemonTeam.map(p => {
+                // Importante comparar por el ID del pokemon activo
+                if (p.id === myActivePkmn.id) {
+                    return { ...p, currentHp: finalMyHp };
+                }
+                return p;
+            });
+
+            return {
+                ...prev,
+                gold: (prev.gold || 0) + goldGained,
+                experience: prev.experience + xpGained,
+                pokemonTeam: updatedTeam
+            };
+        });
+    };
+
     const winBattle = () => {
         setIsGameOver(true);
         setBattleLog(`¡Has derrotado a ${enemy.name.toUpperCase()}!`);
 
-        // Lógica de rareza basada en Experiencia Base de la API
-        // Común: < 100 XP, Raro: 100-199 XP, Legendario: > 200 XP
-        let goldGained = 12; 
+        let goldGained = 12;
         const baseExp = enemy.base_experience || 50;
 
-        if (baseExp >= 200) {
-            goldGained = 120; // Legendario
-        } else if (baseExp >= 100) {
-            goldGained = 31;  // Raro
-        }
+        if (baseExp >= 200) goldGained = 120;
+        else if (baseExp >= 100) goldGained = 31;
 
-        // Actualizamos el estado global del usuario (Oro y XP)
-        setUser(prev => {
-            if (!prev) return null;
-            return {
-                ...prev,
-                gold: (prev.gold || 0) + goldGained,
-                experience: prev.experience + baseExp
-            };
-        });
+        // Guardamos el HP actual (myHP) junto con los premios
+        finalizeBattle(myHP, baseExp, goldGained);
 
         setTimeout(() => {
             alert(`¡Victoria!\n+${baseExp} XP\n+${goldGained} Gs`);
@@ -119,6 +128,10 @@ const Batalla: React.FC = () => {
     const loseBattle = () => {
         setIsGameOver(true);
         setBattleLog(`¡Tu Pokémon ha caído!`);
+
+        // Al perder, el HP es 0. No ganamos XP ni Oro.
+        finalizeBattle(0, 0, 0);
+
         setTimeout(() => {
             alert("Has perdido la batalla...");
             navigate('/menu');
@@ -127,23 +140,29 @@ const Batalla: React.FC = () => {
 
     return (
         <div className="battle-screen">
-            {/* Indicador de Oro superior */}
             <div className="battle-gold-status">{user?.gold || 0} Gs</div>
 
-            {/* MODAL DE SELECCIÓN */}
             {isSelecting && (
                 <div className="selection-overlay">
                     <div className="selection-content">
                         <h2>Selecciona tu Pokémon</h2>
                         <div className="pokemon-grid">
                             {user?.pokemonTeam && user.pokemonTeam.length > 0 ? (
-                                user.pokemonTeam.map((poke, index) => (
-                                    <div key={index} className="poke-option" onClick={() => handleSelectPokemon(poke)}>
-                                        <img src={poke.sprites.front_default} alt={poke.name} />
-                                        <p>{poke.name.toUpperCase()}</p>
-                                        <span>HP: {poke.stats[0].base_stat * 2}</span>
-                                    </div>
-                                ))
+                                user.pokemonTeam.map((poke, index) => {
+                                    const currentHp = poke.currentHp !== undefined ? poke.currentHp : poke.stats[0].base_stat * 2;
+                                    const maxHp = poke.stats[0].base_stat * 2;
+                                    return (
+                                        <div 
+                                            key={index} 
+                                            className={`poke-option ${currentHp <= 0 ? 'disabled' : ''}`} 
+                                            onClick={() => handleSelectPokemon(poke)}
+                                        >
+                                            <img src={poke.sprites.front_default} alt={poke.name} />
+                                            <p>{poke.name.toUpperCase()}</p>
+                                            <span>HP: {currentHp} / {maxHp}</span>
+                                        </div>
+                                    );
+                                })
                             ) : (
                                 <p>No tienes Pokémon en tu equipo.</p>
                             )}
@@ -153,7 +172,6 @@ const Batalla: React.FC = () => {
                 </div>
             )}
 
-            {/* ÁREAS DE COMBATE */}
             <div className={`battle-layout ${isSelecting ? 'blur' : ''}`}>
                 <div className="enemy-side">
                     {enemy && (
@@ -185,7 +203,6 @@ const Batalla: React.FC = () => {
                     )}
                 </div>
 
-                {/* LOG Y CONTROLES */}
                 <div className="battle-footer">
                     <div className="battle-log">
                         <p>{battleLog}</p>

@@ -100,14 +100,18 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const addPokemon = (pokemon: Pokemon) => {
-    setUser((prev) => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        pokemonTeam: [...prev.pokemonTeam, pokemon]
-      };
+    const maxHp = pokemon.stats[0].base_stat * 2;
+    const newPokemon = { ...pokemon, currentHp: maxHp }; // Nace con vida completa
+  
+    setUser(prev => {
+        if (!prev) return null;
+        return {
+            ...prev,
+            pokemonTeam: [...prev.pokemonTeam, newPokemon]
+        };
     });
   };
+
 
   const logout = () => {
     localStorage.removeItem('poke_app_user');

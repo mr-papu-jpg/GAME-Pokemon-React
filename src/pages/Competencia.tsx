@@ -11,13 +11,18 @@ const Competencia: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Pokemon[]>([]);
 
-  // Determinamos si la fase actual es Jefe (cada 10 niveles)
   const isBossStage = user ? user.currentStage % 10 === 0 : false;
-  
-  // Cálculo de recompensas según tus nuevas reglas
   const rewardGold = isBossStage ? 150 : 30;
 
   const toggleSelectPokemon = (poke: Pokemon) => {
+    // NUEVA VALIDACIÓN: Si el Pokémon tiene 0 de vida, no se puede seleccionar
+    const currentHp = poke.currentHp !== undefined ? poke.currentHp : poke.stats[0].base_stat * 2;
+    
+    if (currentHp <= 0) {
+      alert("Este Pokémon está debilitado. Cúralo en el Criadero antes de competir.");
+      return;
+    }
+
     if (selectedTeam.find(p => p.id === poke.id)) {
       setSelectedTeam(selectedTeam.filter(p => p.id !== poke.id));
     } else if (selectedTeam.length < 3) {
@@ -27,13 +32,12 @@ const Competencia: React.FC = () => {
 
   const handleStartBattle = () => {
     if (selectedTeam.length < 3) return alert("Selecciona 3 Pokémon");
-    // Pasamos el equipo, el tipo de fase y la recompensa prometida
-    navigate('/batalla-competencia', { 
-      state: { 
-        team: selectedTeam, 
+    navigate('/batalla-competencia', {
+      state: {
+        team: selectedTeam,
         isBoss: isBossStage,
-        reward: rewardGold 
-      } 
+        reward: rewardGold
+      }
     });
   };
 
@@ -48,7 +52,6 @@ const Competencia: React.FC = () => {
         <p>Fase Actual: {user?.currentStage}</p>
       </header>
 
-      {/* RENDERIZADO DEL MAPA DE LÍNEA */}
       <div className="map-path">
         {[...Array(5)].map((_, i) => {
           const stageNum = (user?.currentStage || 1) + i - 2;
@@ -79,12 +82,11 @@ const Competencia: React.FC = () => {
         </button>
       </div>
 
-      {/* MODAL DE SELECCIÓN */}
       {showModal && (
         <div className="modal-overlay">
           <div className="selection-modal">
             <header className="modal-header">
-              <h3>Tu Equipo</h3>
+              <h3>Tu Equipo (Selecciona 3)</h3>
               <div className="selected-preview">
                 {selectedTeam.map(p => (
                   <img key={p.id} src={p.sprites.front_default} alt="preview" />
@@ -94,21 +96,34 @@ const Competencia: React.FC = () => {
             </header>
 
             <div className="pokemon-scroll-list">
-              {user?.pokemonTeam.map((poke, index) => (
-                <div
-                  key={`${poke.id}-${index}`}
-                  className={`poke-card-select ${selectedTeam.find(p => p.id === poke.id) ? 'selected' : ''}`}
-                  onClick={() => toggleSelectPokemon(poke)}
-                >
-                  <img src={poke.sprites.front_default} alt={poke.name} />
-                  <h4>{poke.name.toUpperCase()}</h4>
-                  <p>HP: {poke.stats[0].base_stat * 2}</p>
-                </div>
-              ))}
+              {user?.pokemonTeam.map((poke, index) => {
+                // Cálculo de vida para mostrar en la card
+                const maxHp = poke.stats[0].base_stat * 2;
+                const currentHp = poke.currentHp !== undefined ? poke.currentHp : maxHp;
+                const isFainted = currentHp <= 0;
+
+                return (
+                  <div
+                    key={`${poke.id}-${index}`}
+                    className={`poke-card-select ${selectedTeam.find(p => p.id === poke.id) ? 'selected' : ''} ${isFainted ? 'fainted-card' : ''}`}
+                    onClick={() => toggleSelectPokemon(poke)}
+                  >
+                    <img src={poke.sprites.front_default} alt={poke.name} />
+                    <h4>{poke.name.toUpperCase()}</h4>
+                    <p className={isFainted ? 'hp-low' : ''}>
+                        HP: {currentHp} / {maxHp}
+                    </p>
+                    {isFainted && <span className="fainted-tag">DEBILITADO</span>}
+                  </div>
+                );
+              })}
             </div>
 
             <div className="modal-actions">
-               <button className="cancel-btn" onClick={() => setShowModal(false)}>Cerrar</button>
+               <button className="cancel-btn" onClick={() => {
+                 setShowModal(false);
+                 setSelectedTeam([]); // Limpiamos selección al cerrar
+               }}>Cerrar</button>
                {selectedTeam.length === 3 && (
                 <button className="start-btn bounce" onClick={handleStartBattle}>
                   ¡A BATALLAR POR {rewardGold} Gs!

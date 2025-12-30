@@ -30,7 +30,11 @@ const Login: React.FC = () => {
     try {
         // Obtenemos los datos completos del inicial elegido
         const res = await axios.get(`https://pokeapi.co/api/v2/pokemon/${starterId}`);
-        const starterPokemon = res.data;
+        const starterPokemon = {
+            ...res.data,
+            currentHp: res.data.stats[0].base_stat * 2
+        };
+
 
         // NUEVO: Definimos el objeto con la economía inicial
         const newUser: User = {

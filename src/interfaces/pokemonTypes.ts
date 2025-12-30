@@ -5,6 +5,7 @@ export type Pokemon = {
   stats: { base_stat: number; stat: { name: string } }[];
   types: { type: { name: string } }[];
   currentStage: number;
+  currentHp?: number;
 }
 
 export type Inventory = {
