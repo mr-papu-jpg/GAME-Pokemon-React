@@ -6,7 +6,6 @@ import './Tienda.css';
 const Tienda: React.FC = () => {
   const { user, setUser } = useUser();
 
-  // Estados para el GameAlert
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<'info' | 'success' | 'error' | 'victory'>('info');
 
@@ -22,7 +21,7 @@ const Tienda: React.FC = () => {
     setUser(prev => {
       if (!prev) return null;
       const inv = { ...prev.inventory };
-      
+
       if (category === 'pokeballs') {
         // @ts-ignore
         inv.pokeballs[subType] += 1;
@@ -34,65 +33,66 @@ const Tienda: React.FC = () => {
       return { ...prev, gold: prev.gold - price, inventory: inv };
     });
 
-    // Feedback de éxito
     setAlertType('success');
     setAlertMsg(`¡Has comprado ${subType.toUpperCase()} con éxito!`);
   };
 
   return (
-    <div className={`store-container ${alertMsg ? 'blur' : ''}`}>
-      <header className="store-header">
-        <h1>Tienda Pokémon</h1>
-        <div className="gold-display">Saldo: {user?.gold} Gs</div>
-      </header>
+    <>
+      <div className={`store-container ${alertMsg ? 'blur' : ''}`}>
+        <header className="store-header">
+          <h1>Tienda Pokémon</h1>
+          <div className="gold-display">Saldo: {user?.gold} Gs</div>
+        </header>
 
-      <section className="store-section">
-        <h2>Pokébolas</h2>
-        <div className="item-grid">
-          <div className="item-card">
-            <span>Bola Sencilla (10 Gs)</span>
-            <button onClick={() => handlePurchase('pokeballs', '', 'sencilla', 10)}>Comprar</button>
+        <section className="store-section">
+          <h2>Pokébolas</h2>
+          <div className="item-grid">
+            <div className="item-card">
+              <span>Bola Sencilla (10 Gs)</span>
+              <button onClick={() => handlePurchase('pokeballs', '', 'sencilla', 10)}>Comprar</button>
+            </div>
+            <div className="item-card">
+              <span>Bola Normal (50 Gs)</span>
+              <button onClick={() => handlePurchase('pokeballs', '', 'normal', 50)}>Comprar</button>
+            </div>
+            <div className="item-card">
+              <span>Bola Maestra (120 Gs)</span>
+              <button onClick={() => handlePurchase('pokeballs', '', 'maestra', 120)}>Comprar</button>
+            </div>
           </div>
-          <div className="item-card">
-            <span>Bola Normal (50 Gs)</span>
-            <button onClick={() => handlePurchase('pokeballs', '', 'normal', 50)}>Comprar</button>
-          </div>
-          <div className="item-card">
-            <span>Bola Maestra (120 Gs)</span>
-            <button onClick={() => handlePurchase('pokeballs', '', 'maestra', 120)}>Comprar</button>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <section className="store-section">
-        <h2>Pociones de Curación</h2>
-        <div className="item-grid">
-          <div className="item-card">
-            <span>Sencilla (20 Gs)</span>
-            <button onClick={() => handlePurchase('potions', 'healing', 'sencilla', 20)}>Comprar</button>
+        <section className="store-section">
+          <h2>Pociones de Curación</h2>
+          <div className="item-grid">
+            <div className="item-card">
+              <span>Sencilla (20 Gs)</span>
+              <button onClick={() => handlePurchase('potions', 'healing', 'sencilla', 20)}>Comprar</button>
+            </div>
+            <div className="item-card">
+              <span>Normal (35 Gs)</span>
+              <button onClick={() => handlePurchase('potions', 'healing', 'normal', 35)}>Comprar</button>
+            </div>
+            <div className="item-card">
+              <span>Avanzada (50 Gs)</span>
+              <button onClick={() => handlePurchase('potions', 'healing', 'avanzada', 50)}>Comprar</button>
+            </div>
           </div>
-          <div className="item-card">
-            <span>Normal (35 Gs)</span>
-            <button onClick={() => handlePurchase('potions', 'healing', 'normal', 35)}>Comprar</button>
-          </div>
-          <div className="item-card">
-            <span>Avanzada (50 Gs)</span>
-            <button onClick={() => handlePurchase('potions', 'healing', 'avanzada', 50)}>Comprar</button>
-          </div>
-        </div>
-      </section>
+        </section>
 
-      <button className="btn-exit" onClick={() => window.history.back()}>Salir de la Tienda</button>
+        <button className="btn-exit" onClick={() => window.history.back()}>Salir de la Tienda</button>
+      </div>
 
-      {/* Sistema de Alertas Globales */}
+      {/* ALERT FUERA DEL DIV BLUR */}
       {alertMsg && (
-        <GameAlert 
-          message={alertMsg} 
-          type={alertType} 
-          onClose={() => setAlertMsg(null)} 
+        <GameAlert
+          message={alertMsg}
+          type={alertType}
+          onClose={() => setAlertMsg(null)}
         />
       )}
-    </div>
+    </>
   );
 };
 

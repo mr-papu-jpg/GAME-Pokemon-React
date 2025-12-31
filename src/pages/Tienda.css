@@ -90,3 +90,9 @@
   cursor: pointer;
 }
 
+.blur {
+  filter: blur(5px);
+  pointer-events: none; /* Esto evita que puedas hacer click en lo que está atrás */
+  user-select: none;
+}
+

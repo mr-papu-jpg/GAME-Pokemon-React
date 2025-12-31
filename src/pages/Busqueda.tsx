@@ -10,8 +10,7 @@ const Busqueda: React.FC = () => {
   const [pokemon, setPokemon] = useState<Pokemon | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [rarity, setRarity] = useState<'COMÚN' | 'RARO' | 'LEGENDARIO'>('COMÚN');
-  
-  // Estados para el GameAlert
+
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [alertType, setAlertType] = useState<'info' | 'success' | 'error' | 'victory'>('info');
 
@@ -107,60 +106,62 @@ const Busqueda: React.FC = () => {
   };
 
   return (
-    <div className={`busqueda-screen ${alertMsg ? 'blur' : ''}`}>
-      <header className="busqueda-header">
-        <Link to="/menu" className="back-link">⬅ Menú</Link>
-        <div className="inventory-status">
-          <span>⚾ {user?.inventory.pokeballs.sencilla}</span>
-          <span>🔵 {user?.inventory.pokeballs.normal}</span>
-          <span>🟣 {user?.inventory.pokeballs.maestra}</span>
-        </div>
-      </header>
+    <>
+      <div className={`busqueda-screen ${alertMsg ? 'blur' : ''}`}>
+        <header className="busqueda-header">
+          <Link to="/menu" className="back-link">⬅ Menú</Link>
+          <div className="inventory-status">
+            <span>⚾ {user?.inventory.pokeballs.sencilla}</span>
+            <span>🔵 {user?.inventory.pokeballs.normal}</span>
+            <span>🟣 {user?.inventory.pokeballs.maestra}</span>
+          </div>
+        </header>
 
-      <div className="encounter-area">
-        {loading && <div className="loader">Moviendo la hierba...</div>}
+        <div className="encounter-area">
+          {loading && <div className="loader">Moviendo la hierba...</div>}
 
-        {pokemon && (
-          <div className={`pokemon-card ${rarity.toLowerCase()}`}>
-            <span className="rarity-label">{rarity}</span>
-            <img src={pokemon.sprites.front_default} alt={pokemon.name} className="pkmn-bounce" />
-            <h2 className="pkmn-name">{pokemon.name}</h2>
+          {pokemon && (
+            <div className={`pokemon-card ${rarity.toLowerCase()}`}>
+              <span className="rarity-label">{rarity}</span>
+              <img src={pokemon.sprites.front_default} alt={pokemon.name} className="pkmn-bounce" />
+              <h2 className="pkmn-name">{pokemon.name}</h2>
 
-            <div className="catch-options">
-              <p>¿Qué Pokébola quieres lanzar?</p>
-              <div className="ball-buttons">
-                <button onClick={() => intentarCapturar('sencilla')} disabled={user?.inventory.pokeballs.sencilla === 0}>
-                  Sencilla
-                </button>
-                <button onClick={() => intentarCapturar('normal')} disabled={user?.inventory.pokeballs.normal === 0}>
-                  Normal
-                </button>
-                <button onClick={() => intentarCapturar('maestra')} disabled={user?.inventory.pokeballs.maestra === 0}>
-                  Maestra
-                </button>
+              <div className="catch-options">
+                <p>¿Qué Pokébola quieres lanzar?</p>
+                <div className="ball-buttons">
+                  <button onClick={() => intentarCapturar('sencilla')} disabled={user?.inventory.pokeballs.sencilla === 0}>
+                    Sencilla
+                  </button>
+                  <button onClick={() => intentarCapturar('normal')} disabled={user?.inventory.pokeballs.normal === 0}>
+                    Normal
+                  </button>
+                  <button onClick={() => intentarCapturar('maestra')} disabled={user?.inventory.pokeballs.maestra === 0}>
+                    Maestra
+                  </button>
+                </div>
               </div>
             </div>
+          )}
+        </div>
+
+        {!loading && !pokemon && (
+          <div className="idle-area">
+            <button className="search-btn" onClick={buscarPokemonAleatorio}>
+              Explorar Hierba Alta
+            </button>
           </div>
         )}
       </div>
 
-      {!loading && !pokemon && (
-        <div className="idle-area">
-          <button className="search-btn" onClick={buscarPokemonAleatorio}>
-            Explorar Hierba Alta
-          </button>
-        </div>
-      )}
-
-      {/* Sistema de Alertas Globales */}
+      {/* ALERT FUERA DEL DIV BLUR */}
       {alertMsg && (
-        <GameAlert 
-          message={alertMsg} 
-          type={alertType} 
-          onClose={() => setAlertMsg(null)} 
+        <GameAlert
+          message={alertMsg}
+          type={alertType}
+          onClose={() => setAlertMsg(null)}
         />
       )}
-    </div>
+    </>
   );
 };
 

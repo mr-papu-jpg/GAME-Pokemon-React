@@ -63,6 +63,7 @@ const Criadero: React.FC = () => {
   };
 
   return (
+    <>  
     <div className={`criadero-screen ${alertMsg ? 'blur' : ''}`}>
       <header className="criadero-header">
         <Link to="/menu" className="back-btn">⬅ Volver</Link>
@@ -159,6 +160,7 @@ const Criadero: React.FC = () => {
         />
       )}
     </div>
+    </>
   );
 };
 
