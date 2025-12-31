@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useUser } from '../context/UserContext';
+import GameAlert from '../components/GameAlert'; // Asegúrate de que la ruta sea correcta
 import { useNavigate } from 'react-router-dom';
 import './Batalla.css';
 
@@ -21,6 +22,10 @@ const Batalla: React.FC = () => {
     const [isPlayerTurn, setIsPlayerTurn] = useState(true);
     const [isGameOver, setIsGameOver] = useState(false);
 
+    // Estados para el nuevo GameAlert
+    const [alertMsg, setAlertMsg] = useState<string | null>(null);
+    const [alertType, setAlertType] = useState<'info' | 'success' | 'error' | 'victory'>('info');
+
     useEffect(() => {
         const fetchEnemy = async () => {
             try {
@@ -38,11 +43,11 @@ const Batalla: React.FC = () => {
     }, []);
 
     const handleSelectPokemon = (poke: any) => {
-        // Validar si el Pokémon tiene vida antes de dejarlo entrar
         const currentHp = poke.currentHp !== undefined ? poke.currentHp : poke.stats[0].base_stat * 2;
-        
+
         if (currentHp <= 0) {
-            alert("¡Este Pokémon está debilitado y no puede luchar!");
+            setAlertType('error');
+            setAlertMsg("¡Este Pokémon está debilitado y no puede luchar!");
             return;
         }
 
@@ -84,19 +89,15 @@ const Batalla: React.FC = () => {
         }
     };
 
-    // Función unificada para guardar TODO el progreso
     const finalizeBattle = (finalMyHp: number, xpGained: number, goldGained: number) => {
         setUser(prev => {
             if (!prev) return null;
-            
             const updatedTeam = prev.pokemonTeam.map(p => {
-                // Importante comparar por el ID del pokemon activo
                 if (p.id === myActivePkmn.id) {
                     return { ...p, currentHp: finalMyHp };
                 }
                 return p;
             });
-
             return {
                 ...prev,
                 gold: (prev.gold || 0) + goldGained,
@@ -116,26 +117,35 @@ const Batalla: React.FC = () => {
         if (baseExp >= 200) goldGained = 120;
         else if (baseExp >= 100) goldGained = 31;
 
-        // Guardamos el HP actual (myHP) junto con los premios
         finalizeBattle(myHP, baseExp, goldGained);
 
         setTimeout(() => {
-            alert(`¡Victoria!\n+${baseExp} XP\n+${goldGained} Gs`);
-            navigate('/menu');
-        }, 2000);
+            setAlertType('victory');
+            setAlertMsg(`¡Victoria! Ganaste ${baseExp} XP y ${goldGained} Gs`);
+        }, 1500);
     };
 
     const loseBattle = () => {
         setIsGameOver(true);
         setBattleLog(`¡Tu Pokémon ha caído!`);
-
-        // Al perder, el HP es 0. No ganamos XP ni Oro.
         finalizeBattle(0, 0, 0);
 
         setTimeout(() => {
-            alert("Has perdido la batalla...");
+            setAlertType('error');
+            setAlertMsg("Has perdido la batalla... Tu Pokémon necesita descansar.");
+        }, 1500);
+    };
+
+    // Función para manejar el cierre del Alert y navegar
+    const handleCloseAlert = () => {
+        const isFaintedError = alertMsg?.includes("debilitado");
+        setAlertMsg(null);
+        
+        // Si el mensaje era un aviso de debilitado, no salimos de la batalla
+        // Si era por fin de juego (victoria/derrota), volvemos al menú
+        if (isGameOver) {
             navigate('/menu');
-        }, 2000);
+        }
     };
 
     return (
@@ -152,9 +162,9 @@ const Batalla: React.FC = () => {
                                     const currentHp = poke.currentHp !== undefined ? poke.currentHp : poke.stats[0].base_stat * 2;
                                     const maxHp = poke.stats[0].base_stat * 2;
                                     return (
-                                        <div 
-                                            key={index} 
-                                            className={`poke-option ${currentHp <= 0 ? 'disabled' : ''}`} 
+                                        <div
+                                            key={index}
+                                            className={`poke-option ${currentHp <= 0 ? 'disabled' : ''}`}
                                             onClick={() => handleSelectPokemon(poke)}
                                         >
                                             <img src={poke.sprites.front_default} alt={poke.name} />
@@ -172,7 +182,7 @@ const Batalla: React.FC = () => {
                 </div>
             )}
 
-            <div className={`battle-layout ${isSelecting ? 'blur' : ''}`}>
+            <div className={`battle-layout ${(isSelecting || alertMsg) ? 'blur' : ''}`}>
                 <div className="enemy-side">
                     {enemy && (
                         <div className="pokemon-display">
@@ -215,6 +225,15 @@ const Batalla: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* Sistema de Alertas Globales */}
+            {alertMsg && (
+                <GameAlert 
+                    message={alertMsg} 
+                    type={alertType} 
+                    onClose={handleCloseAlert} 
+                />
+            )}
         </div>
     );
 };

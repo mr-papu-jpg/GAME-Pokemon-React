@@ -1,0 +1,56 @@
+.game-alert-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: flex-end; /* Lo ponemos abajo como en los juegos */
+  padding-bottom: 50px;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+}
+
+.game-alert-box {
+  width: 90%;
+  max-width: 500px;
+  background: white;
+  border: 4px solid #333;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 0 0 4px white inset;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.game-alert-content p {
+  color: #333;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+}
+
+.game-alert-btn {
+  background: #3b4cca;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  font-weight: bold;
+  cursor: pointer;
+  float: right;
+  border-radius: 5px;
+}
+
+/* Colores por tipo */
+.game-alert-box.victory { border-color: #ffcb05; }
+.game-alert-box.error { border-color: #ff5252; }
+.game-alert-box.success { border-color: #4caf50; }
+

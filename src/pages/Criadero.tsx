@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useUser } from '../context/UserContext';
 import { Link } from 'react-router-dom';
+import GameAlert from '../components/GameAlert'; // Importamos el nuevo componente
 import type { Pokemon } from '../interfaces/pokemonTypes';
 import './Criadero.css';
 
@@ -8,26 +9,36 @@ const Criadero: React.FC = () => {
   const { user, setUser } = useUser();
   const [selectedPoke, setSelectedPoke] = useState<Pokemon | null>(null);
 
+  // Estados para el GameAlert
+  const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [alertType, setAlertType] = useState<'info' | 'success' | 'error' | 'victory'>('info');
+
   if (!user) return <p>Cargando datos del entrenador...</p>;
 
-  // Función para aplicar la curación
   const handleHeal = (type: 'sencilla' | 'normal' | 'avanzada') => {
     if (!selectedPoke || !user) return;
 
     const inventory = user.inventory.potions.healing;
-    if (inventory[type] <= 0) return alert("No tienes esta poción");
+    if (inventory[type] <= 0) {
+      setAlertType('error');
+      setAlertMsg("No tienes esta poción en tu inventario.");
+      return;
+    }
 
     const maxHp = selectedPoke.stats[0].base_stat * 2;
     const currentHp = selectedPoke.currentHp ?? maxHp;
 
-    if (currentHp >= maxHp) return alert("El Pokémon ya está sano");
+    if (currentHp >= maxHp) {
+      setAlertType('info');
+      setAlertMsg("El Pokémon ya se encuentra en perfecto estado.");
+      return;
+    }
 
     let healAmount = 0;
     if (type === 'sencilla') healAmount = 20;
     if (type === 'normal') healAmount = 50;
     if (type === 'avanzada') healAmount = 999;
 
-    // Realizamos la actualización
     setUser(prev => {
         if (!prev) return null;
 
@@ -37,7 +48,6 @@ const Criadero: React.FC = () => {
         const newTeam = prev.pokemonTeam.map(p => {
             if (p.id === selectedPoke.id) {
                 const updatedHp = Math.min(maxHp, (p.currentHp ?? maxHp) + healAmount);
-                // IMPORTANTE: No actualices estados locales (como setSelectedPoke) aquí dentro
                 return { ...p, currentHp: updatedHp };
             }
             return p;
@@ -46,14 +56,14 @@ const Criadero: React.FC = () => {
         return { ...prev, inventory: newInventory, pokemonTeam: newTeam };
     });
 
-    // Cerramos el modal o reseteamos la selección DESPUÉS del setUser para evitar el conflicto
-    setSelectedPoke(null); 
-    alert("¡Pokémon curado!");
+    // Feedback visual y limpieza
+    setAlertType('success');
+    setAlertMsg(`¡${selectedPoke.name.toUpperCase()} ha sido curado!`);
+    setSelectedPoke(null);
   };
 
-
   return (
-    <div className="criadero-screen">
+    <div className={`criadero-screen ${alertMsg ? 'blur' : ''}`}>
       <header className="criadero-header">
         <Link to="/menu" className="back-btn">⬅ Volver</Link>
         <Link to="/busqueda" className="nav-btn btn-hunt">🌿 Ir a Buscar</Link>
@@ -74,21 +84,20 @@ const Criadero: React.FC = () => {
             const hpPercentage = (currentHp / maxHp) * 100;
 
             return (
-              <div 
-                key={`${poke.id}-${index}`} 
+              <div
+                key={`${poke.id}-${index}`}
                 className={`mini-pokemon-card ${currentHp === 0 ? 'fainted' : ''}`}
                 onClick={() => setSelectedPoke(poke)}
               >
                 <img src={poke.sprites.front_default} alt={poke.name} />
                 <h3>{poke.name}</h3>
-                
-                {/* Barra de Vida Visual */}
+
                 <div className="hp-bar-container">
-                  <div 
-                    className="hp-bar-fill" 
-                    style={{ 
+                  <div
+                    className="hp-bar-fill"
+                    style={{
                       width: `${hpPercentage}%`,
-                      backgroundColor: hpPercentage < 30 ? '#ff5252' : '#4caf50' 
+                      backgroundColor: hpPercentage < 30 ? '#ff5252' : '#4caf50'
                     }}
                   ></div>
                 </div>
@@ -114,31 +123,40 @@ const Criadero: React.FC = () => {
             <button className="close-modal" onClick={() => setSelectedPoke(null)}>X</button>
             <img src={selectedPoke.sprites.front_default} alt="heal" />
             <h2>Curar a {selectedPoke.name.toUpperCase()}</h2>
-            
+
             <div className="potion-list">
-              <button 
+              <button
                 onClick={() => handleHeal('sencilla')}
-                disabled={user.inventory.potions.healing.sencilla === 0 || (selectedPoke.currentHp || 0) >= (selectedPoke.stats[0].base_stat * 2)}
+                disabled={user.inventory.potions.healing.sencilla === 0}
               >
                 Poción (20 HP) - Tienes: {user.inventory.potions.healing.sencilla}
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => handleHeal('normal')}
-                disabled={user.inventory.potions.healing.normal === 0 || (selectedPoke.currentHp || 0) >= (selectedPoke.stats[0].base_stat * 2)}
+                disabled={user.inventory.potions.healing.normal === 0}
               >
                 Súper Poción (50 HP) - Tienes: {user.inventory.potions.healing.normal}
               </button>
-              
-              <button 
+
+              <button
                 onClick={() => handleHeal('avanzada')}
-                disabled={user.inventory.potions.healing.avanzada === 0 || (selectedPoke.currentHp || 0) >= (selectedPoke.stats[0].base_stat * 2)}
+                disabled={user.inventory.potions.healing.avanzada === 0}
               >
                 Poción Máxima (Full) - Tienes: {user.inventory.potions.healing.avanzada}
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* SISTEMA DE NOTIFICACIONES */}
+      {alertMsg && (
+        <GameAlert 
+          message={alertMsg} 
+          type={alertType} 
+          onClose={() => setAlertMsg(null)} 
+        />
       )}
     </div>
   );
