@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext, type ReactNode } from 'react';
+import React, { useState, createContext, useContext, useEffect, type ReactNode } from 'react';
 import type { Pokemon, User } from '../interfaces/pokemonTypes';
 
 
