@@ -9,6 +9,7 @@ import Batalla from './pages/Batalla';
 import Competencia from './pages/Competencia';
 import BatallaCompetencia from './pages/BatallaCompetencia';
 import Tienda from './pages/Tienda';
+import NotFound from './pages/NotFound'
 
 const App: React.FC = () => {
   return (
