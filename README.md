@@ -32,7 +32,7 @@ Si quieres ejecutar este proyecto localmente:
     ```
 2.  Entra a la carpeta:
     ```bash
-    cd nombre-de-tu-repo
+    cd GAME-POKEMON
     ```
 3.  Instala las dependencias:
     ```bash
