@@ -19,10 +19,23 @@ export type Inventory = {
 
 export type User = {
   name: string;
-  pokemonTeam: any[];
+  gold: number; 
   experience: number;
-  level: number;
   currentStage: number;
-  gold: number;
-  inventory: Inventory;
+  pokemonTeam: any[];
+  inventory: {        
+    pokeballs: {
+      sencilla: number;
+      normal: number;
+      maestra: number;
+    };
+    potions: {
+      healing: {
+        sencilla: number;
+        normal: number;
+        avanzada: number;
+      }
+    };
+  };
+  level: number;
 }
