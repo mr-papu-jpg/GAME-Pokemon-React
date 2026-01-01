@@ -24,6 +24,7 @@ const App: React.FC = () => {
                 <Route path="*" element={<Navigate to="/" />} />
                 <Route path="/batalla-competencia" element={<BatallaCompetencia />} />
                 <Route path='/tienda' element={<Tienda />} />
+                <Route path="*" element={<NotFound />} />
             </Routes>
         </BrowserRouter>
     </UserProvider>

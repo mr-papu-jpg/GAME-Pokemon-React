@@ -1,0 +1,37 @@
+.not-found-screen {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #f0f0f0;
+  text-align: center;
+  padding: 20px;
+}
+
+.not-found-card h1 {
+  font-size: 5rem;
+  color: #333;
+  margin: 0;
+}
+
+.psyduck-confused {
+  width: 200px;
+  animation: wobble 2s infinite ease-in-out;
+}
+
+@keyframes wobble {
+  0%, 100% { transform: rotate(-5deg); }
+  50% { transform: rotate(5deg); }
+}
+
+.back-home-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #3b4cca;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
